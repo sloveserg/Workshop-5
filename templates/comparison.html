@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="container">
+        <div class="col-12">
+            {% for category, products in object_list.items %}
+                <!-- выписываем название категории товаров, которые сравниваются -->
+                <h1 class="text-center">{{ category }}</h1>
+                <div class="card-deck">
+                    <!-- рендерим товары с данной категории -->
+                    {% for product in products %}
+                        <div class="card border-success">
+                            <img class="img-thumbnail" src="{{ product.image.url }}" alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                {% for row in product.get_description %}
+                                    <p class="card-text">{{ row }}</p>
+                                {% endfor %}
+                                <h3 class="card-text">
+                                    <!-- кнопка удаления товара со списка сравнений -->
+                                    <!-- после удаление рендерит страницу списка сравнений, чтоб показать, что товар был удален -->
+                                    <button type="button" class="btn btn-success"
+                                            onclick="location.href='{% url 'delete_from_comparison' product.id %}'">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                    <button value="{{ product.id }}" id="add_to_cart" type="button"
+                                            class="btn btn-success">
+                                        <i class="fa fa-cart-plus"></i>
+                                    </button>
+                                    <small class="text-muted">{{ product.discount_price }}
+                                        <span>&#8372;</span></small>
+                                </h3>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

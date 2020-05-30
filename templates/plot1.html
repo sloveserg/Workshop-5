@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+
+{% block body %}
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <body>
+    {% for id in ids %}
+        <div id="{{ id }}"></div>
+    {% endfor %}
+
+    </body>
+
+
+    <footer>
+
+
+        <script type="text/javascript">
+            let layout = [
+                {title: 'Товары и их количество покупок', font: {family: 'Raleway, sans-serif'}},
+                {title: 'Количество покупаемых товаров каждый день', font: {family: 'Raleway, sans-serif'}},
+            ];
+            let graphs = {{graphJSON | safe}};
+            let ids = {{ids | safe}};
+            for (let i = 0; i < ids.length; i++) {
+                console.debug(i);
+                // находим блок с таким айди
+                // .data у меня не сработало, пришлос переделать
+                // создаю список, в котором словарь с такими данными
+                // type - bar, чтоб рисовать в стиле бар график ( колоны )
+                Plotly.newPlot(document.getElementById(i.toString()),
+                    [{
+                        x: graphs[i].x,
+                        y: graphs[i].y,
+                        type: 'bar',
+                        text: graphs[i].y.map(String),
+                        textposition: 'auto',
+                    }],
+                    layout[i] // тайтл графика
+                );
+            }
+        </script>
+    </footer>
+{% endblock %}

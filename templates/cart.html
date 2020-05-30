@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+<!-- подключаем crispy, чтоб работал boostrap на Django forms -->
+{% load crispy_forms_tags %}
+
+{% block body %}
+    <div class="container">
+        {% if data %}
+            <!-- Если товары в корзине есть-->
+            <h2 class="text-center">Добавленные в корзину товары:</h2>
+        {% else %}
+            <!-- Если товаров в корзине нет -->
+            <h2 class="text-center">Корзина пустая</h2>
+        {% endif %}
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-lg-4">
+                <!-- рендерим все продукты с корзины в столбик -->
+                {% for product in data %}
+                    <div class="card-deck" style="padding: 10px;">
+                        <div class="card border-success">
+                            <img class="img-thumbnail" src="{{ product.image.url }}" alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                {% for row in product.get_description %}
+                                    <p class="card-text">{{ row }}</p>
+                                {% endfor %}
+                                <h3 class="card-text">
+                                    <!-- кнопка удаления товара с корзины -->
+                                    <!-- после удаление рендерит страницу корзины, чтоб показать, что товар был удален -->
+                                    <button type="button" class="btn btn-success"
+                                            onclick="location.href='{% url 'delete_from_cart' product.id %}'">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                    <small class="text-muted">{{ product.discount_price }}
+                                        <span>&#8372;</span></small>
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-lg-2"></div>
+            <div class="col-lg-4" style="padding-top:80px;">
+                <!-- если введенные юзером данные валидны, то показываем оповещение, что заказ был успешно оформлен -->
+                {% if messages %}
+                    <div align="center" class="alert alert-success" role="alert">
+                        {% for message in messages %}
+                            <h4>{{ message }}</h4>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <!-- если корзина не пустая, то показываем форму юзеру -->
+                {% if data %}
+                    <form class="form-group" action="{% url 'cart' %}" method="post">
+                        {% csrf_token %}
+                        <!-- фильтр crispy используется, чтоб подтянуть css к DJango forms -->
+                        {{ form|crispy }}
+                        <input class="btn btn-primary" type="submit" value="Оформить заказ">
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

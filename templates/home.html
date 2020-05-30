@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="container">
+        <div class="col-12">
+            <!-- проходим по подспискам продуктов -->
+            {% for slice in object_list %}
+                <div class="card-deck" style="padding: 15px;">
+                    <!-- проходим по продуктам в подсписке( 3 штуки) -->
+                    {% for product in slice %}
+                        <div class="card border-success">
+                            <!-- подставляем значение url поля image обьекта product -->
+                            <img class="img-thumbnail" src="{{ product.image.url }}" alt="Card image cap">
+                            <div class="card-body">
+                                <!-- подставляем название продукта в тег h5 -->
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <!-- вызываем метод модели Product get_description, который возвращает список характеристик -->
+                                {% for row in product.get_description %}
+                                    <p class="card-text">{{ row }}</p>
+                                {% endfor %}
+                                <h3 class="card-text">
+                                    <!-- подставляем в значение кнопки ID продукта, чтобы его отправить с помощью AJAX при добавлении в корзину -->
+                                    <!-- при нажатии на кнопку, функция вытянет с кнопки айди продукта и отправит на url 'add_to_cart' -->
+                                    <button value="{{ product.id }}" id="add_to_cart" type="button"
+                                            class="btn btn-success">
+                                        <i class="fa fa-cart-plus"></i>
+                                    </button>
+                                    <!-- подставляем в значение кнопки ID продукта, чтобы его отправить с помощью AJAX при добавлении в список сравнений -->
+                                    <!-- при нажатии на кнопку, функция вытянет с кнопки айди продукта и отправит на url 'add_to_comparison' -->
+                                    <button value="{{ product.id }}" id="add_to_comparison" type="button"
+                                            class="btn btn-success">
+                                        <i class="fa fa-balance-scale"></i>
+                                    </button>
+                                    <!-- если скидка не 0, то пишем старую цену перечеркнутую, а новую красным цветом -->
+                                    <!-- если 0, цена обычным цветом -->
+                                    {% if product.discount %}
+                                        <small class="text-muted"
+                                               style="text-decoration: line-through;padding: 5px;">{{ product.price }}
+                                        </small>
+                                        <small style="color:red;">
+                                            {{ product.discount_price }}
+                                        </small>
+                                    {% else %}
+                                        <small class="text-muted">
+                                            {{ product.discount_price }}
+                                        </small>
+                                    {% endif %}
+
+                                    <small class="text-muted">
+                                        <span>&#8372;</span>
+                                    </small>
+                                </h3>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+            integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+            crossorigin="anonymous"></script>
+
+    <!-- JQUERY -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- shopping-cart icon -->
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <title>Shop</title>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Сергей Коломиец</a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+
+            <li class="nav-item">
+                <!-- редирект на домашнюю страницу -->
+                <a class="nav-link" href="{% url 'home' %}">Главная <span class="sr-only">(current)</span></a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">Категории </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <!-- создаем кнопку перехода на страницу продуктов с данной категории -->
+                    {% for category in categories %}
+                        <a class="dropdown-item" href="{% url 'products' category.slug %}">{{ category.name }}</a>
+                    {% endfor %}
+                    <div class="dropdown-divider"></div>
+                    <!-- редирект на домашнюю страницу -->
+                    <a class="dropdown-item" href="{% url 'home' %}">Все товары</a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <!-- редирект на страницу с графиками -->
+                <a class="nav-link" href="{% url 'plot1' %}">Dashbord <span class="sr-only">(current)</span></a>
+            </li>
+
+            <li class="nav-item ">
+                <!-- редирект на страницу с списком сравнений -->
+                <a class="nav-link" href="{% url 'comparison' %}">
+                    Cравнение
+                    <i class="fa fa-balance-scale"></i>
+                    <!-- в тег span подставляем количество товаров в списке сравнений -->
+                    <span id="comparison" class="badge badge-success badge-pill"></span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <!-- редирект на страницу с корзины -->
+                <a class="nav-link" href="{% url 'cart' %}">
+                    Корзина
+                    <i class="fa fa-shopping-cart"></i>
+                    <!-- в тег span подставляем количество товаров в корзине -->
+                    <span id="cart" class="badge badge-success badge-pill"></span>
+                </a>
+            </li>
+
+        </ul>
+
+        <ul class="navbar-nav ml-auto">
+            <!-- форма для поиска товаров по названию -->
+            <form class="form-inline my-2 my-lg-0" action="{% url 'search' %}">
+                <input class="form-control mr-sm-2" type="search" placeholder="Искать товар ..." aria-label="Search"
+                       name="q" value="{{ request.GET.q }}" required="required">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Искать</button>
+            </form>
+        </ul>
+
+    </div>
+</nav>
+
+{% block body %}
+{% endblock %}
+
+<script>
+    {# Функция для отображения количества товаров в корзине/сравнение возле кнопок рядом  #}
+    {# Скрипт вызывается при загрузке/обновлении страницы   #}
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: '{% url "itemsAmount" %}',
+            dataType: 'json',
+            success: function (data, textStatus,) {
+                $("span[id=cart]").text(data['cartAmount']);
+                $("span[id=comparison]").text(data['comparisonAmount'])
+            },
+            error: function () {
+                alert("");
+            }
+        });
+    });
+
+    // функция, которая срабатывает при нажатии на кнопку добавления в корзину
+    // функция отправляет get запрос на урл под названием 'add_to_cart'
+    // отправляет json обьект, в котором под ключем ID лежит ID продукта, который мы хотим добавить в корзину
+    // Если успешно добавлен - срабатывает alert, что товар добавлен и делаем перезагрузку страницы, чтоб
+    // показать корректное количество товаров в корзине возле кнопки сверху
+
+    $("button[id=add_to_cart]").click(function () {
+        $.ajax({
+            type: "GET",
+            url: "{% url 'add_to_cart' %}",
+            dataType: 'json',
+            data: {'id': $(this).val()},
+            success: function (data, textStatus,) {
+                alert("Product is added to cart!");
+                location.reload();
+            },
+            error: function () {
+                alert("Product already exists in cart!");
+            }
+        });
+    });
+
+    // функция, которая срабатывает при нажатии на кнопку добавления в сравнение
+    // функция отправляет get запрос на урл под названием 'add_to_comparison'
+    // отправляет json обьект, в котором под ключем ID лежит ID продукта, который мы хотим добавить в сравнение
+    // Если успешно добавлен - срабатывает alert, что товар добавлен и делаем перезагрузку страницы, чтоб
+    // показать корректное количество товаров в списке сравнений возле кнопки сверху
+    $("button[id=add_to_comparison]").click(function () {
+        $.ajax({
+            type: "GET",
+            url: "{% url 'add_to_comparison' %}",
+            dataType: 'json',
+            data: {'id': $(this).val()},
+            success: function (data, textStatus,) {
+                alert("Product is added to comparison list!");
+                location.reload();
+            },
+            error: function () {
+                alert("Product already exists in comparison list!");
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
